@@ -1,6 +1,6 @@
 <?php
 
-namespace Instagram\Exception;
+namespace Instagram\Exceptions;
 
 
 class InstagramEncodedException extends \Exception

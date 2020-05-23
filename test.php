@@ -6,6 +6,8 @@ require_once __DIR__ . '/src/Instagram.php';
 use Instagram\Scraper;
 
 // Instantiate Instagram Scraper library
-$Scraper = new Scraper();
+$scraper = new Scraper();
 
-var_dump($Scraper);
+$data = $scraper->account('iratee');
+
+var_dump($data);

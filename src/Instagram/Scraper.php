@@ -2,19 +2,46 @@
 
 namespace Instagram;
 
+use Instagram\Libraries\Request;
+use Instagram\Exceptions\InstagramException;
+
 class Scraper
 {
 
   /**
    * Default configuration
    */
-  private $config = null;
+  private $config  = null;
+
+  /**
+   * Request instance holder
+   */
+  private $request = null;
 
   /**
    * Class constructor
    */
   public function __construct($config = null) {
-    return $this->_setInitial($config);
+
+    /**
+     * Set the initial configuration variables.
+     */
+    $this->_setInitial($config);
+
+    /**
+     * Instantiate the request instance.
+     */
+    $this->request = new Request($this->config);
+  }
+
+  public function account ($username = null) {
+    if (is_null($username)) throw new InstagramException('No username provided');
+
+    $response = $this->request
+      ->build('User/AccountData', [ 'user' => $username ])
+      ->call();
+
+    return $response;
   }
 
 
@@ -37,9 +64,11 @@ class Scraper
       foreach ($config as $key => $val) {
         $this->set($key, $val);
       }
-
-      return $this;
+    } else {
+      $this->config = (object) [];
     }
+
+    return $this;
   }
 
   /**

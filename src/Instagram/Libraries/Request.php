@@ -110,7 +110,7 @@ class Request {
 		if (empty($response)) return [ 'error' => 'No response' ];
 
     if ($this->endpointData->type === 'dom') {
-      $response = $this->dom->set($response)->pick('account');
+      $response = $this->dom->set($response)->pick($this->endpointDataKey);
     } else {
 
       // Decode the response
@@ -135,6 +135,9 @@ class Request {
 
     $headers['user-agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36';
     $headers['x-requested-with'] = 'XMLHttpRequest';
+    $headers['accept'] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9";
+    $headers['x-csrftoken'] = md5(uniqid());
+    //$headers['urlgen'] = "{\"72.90.74.51\": 701}:1jcc5b:tVIlRrk2_W2ED5O5wYNYh35CvZ4";
 
     return $headers;
   }

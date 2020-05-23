@@ -22,12 +22,16 @@ class Account
   public function set ($endpoint, $user) {
     $instance = new self();
 
-      print_r($user);
-
 
     switch ($endpoint) {
 
-      case 'User/AccountData':
+      case 'User/AccountJSON':
+        /**
+         * @TODO Accept the /?__a=1 route
+         */
+        break;
+
+      case 'User/AccountPage':
         $instance->username = $user['username'];
         $instance->followsCount = $user['edge_follow']['count'];
         $instance->followedByCount = $user['edge_followed_by']['count'];

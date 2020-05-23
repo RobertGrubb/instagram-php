@@ -38,7 +38,7 @@ class Scraper
     if (is_null($username)) throw new InstagramException('No username provided');
 
     $response = $this->request
-      ->build('User/AccountData', [ 'user' => $username ])
+      ->build('User/AccountPage', [ 'user' => $username ])
       ->call();
 
     return $response;

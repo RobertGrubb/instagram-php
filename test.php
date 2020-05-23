@@ -8,6 +8,6 @@ use Instagram\Scraper;
 // Instantiate Instagram Scraper library
 $scraper = new Scraper();
 
-$data = $scraper->account('iratee');
+$data = $scraper->account('_mattGrubb');
 
 var_dump($data);

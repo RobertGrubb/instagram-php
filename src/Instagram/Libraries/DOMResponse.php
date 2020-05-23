@@ -18,7 +18,7 @@ class DOMResponse {
 
     switch ($type) {
 
-      case 'account':
+      case 'User/AccountPage':
         $this->data = $this->getAccountData();
         break;
 
@@ -35,25 +35,23 @@ class DOMResponse {
     $userArray = json_decode($data[1], true, 512, JSON_BIGINT_AS_STRING);
 
     if (!isset($userArray['entry_data'])) {
-        throw new InstagramEncodedException('Data response incorrect');
+        throw new InstagramException('Data response incorrect');
     }
 
-    print_r($userArray['entry_data']);
-
     if (!isset($userArray['entry_data']['ProfilePage'])) {
-        throw new InstagramEncodedException('Data response incorrect');
+        throw new InstagramException('Data response incorrect');
     }
 
     if (!isset($userArray['entry_data']['ProfilePage'][0])) {
-        throw new InstagramEncodedException('Data response incorrect');
+        throw new InstagramException('Data response incorrect');
     }
 
     if (!isset($userArray['entry_data']['ProfilePage'][0]['graphql'])) {
-        throw new InstagramEncodedException('Data response incorrect');
+        throw new InstagramException('Data response incorrect');
     }
 
     if (!isset($userArray['entry_data']['ProfilePage'][0]['graphql']['user'])) {
-        throw new InstagramEncodedException('Data response incorrect');
+        throw new InstagramException('Data response incorrect');
     }
 
     return $userArray['entry_data']['ProfilePage'][0]['graphql']['user'];

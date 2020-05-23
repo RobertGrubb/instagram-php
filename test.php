@@ -7,3 +7,5 @@ use Instagram\Scraper;
 
 // Instantiate Instagram Scraper library
 $Scraper = new Scraper();
+
+var_dump($Scraper);

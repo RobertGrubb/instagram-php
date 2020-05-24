@@ -49,6 +49,21 @@ class Scraper
     return $response;
   }
 
+  /**
+   * Get account data
+   * @param  string $username
+   * @param  string $src 'Page', 'JSON'
+   */
+  public function media ($code = null, $src = 'page') {
+    if (is_null($code)) throw new InstagramException('No code provided');
+
+    $response = $this->request
+      ->build('media/' . $src, [ 'code' => $code ])
+      ->call();
+
+    return $response;
+  }
+
 
   /**
    * Get a configuration variable from the

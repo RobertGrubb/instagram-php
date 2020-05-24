@@ -8,6 +8,7 @@ use Instagram\Scraper;
 // Instantiate Instagram Scraper library
 $scraper = new Scraper();
 
+// You can call account with the source of 'Page', or 'JSON'.
 $data = $scraper->account('_mattGrubb');
 
-var_dump($data);
+print_r($data);

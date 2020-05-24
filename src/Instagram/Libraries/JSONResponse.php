@@ -8,13 +8,13 @@ use Instagram\Validations\AccountValidation;
 
 use Instagram\Models\Account;
 
-class DOMResponse {
+class JSONResponse {
 
   private $data;
-  private $dom;
+  private $json;
 
-  public function set ($dom) {
-    $this->dom = $dom;
+  public function set ($json) {
+    $this->json = json_decode($json);
     return $this;
   }
 
@@ -22,11 +22,10 @@ class DOMResponse {
 
     switch ($type) {
 
-      case 'user/account/page':
-        $sharedData = $this->getSharedData();
+      case 'user/account/json':
         $Validator = new AccountValidation;
         $Model     = new Account;
-        $data = $Validator->run($type, $sharedData);
+        $data = $Validator->run($type, $this->json);
         $this->data = $Model->set($type, $data);
         break;
 
@@ -36,12 +35,6 @@ class DOMResponse {
     }
 
     return $this->data;
-  }
-
-  private function getSharedData () {
-    preg_match('/window._sharedData\s\=\s(.*?)\;<\/script>/', $this->dom, $data);
-    $sharedData = json_decode($data[1], true, 512, JSON_BIGINT_AS_STRING);
-    return $sharedData;
   }
 
 }

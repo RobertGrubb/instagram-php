@@ -34,11 +34,16 @@ class Scraper
     $this->request = new Request($this->config);
   }
 
-  public function account ($username = null) {
+  /**
+   * Get account data
+   * @param  string $username
+   * @param  string $src 'Page', 'JSON'
+   */
+  public function account ($username = null, $src = 'page') {
     if (is_null($username)) throw new InstagramException('No username provided');
 
     $response = $this->request
-      ->build('User/AccountPage', [ 'user' => $username ])
+      ->build('user/account/' . $src, [ 'user' => $username ])
       ->call();
 
     return $response;

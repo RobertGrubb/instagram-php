@@ -11,13 +11,13 @@ class Endpoints {
        * User Endpoints
        */
 
-      'User/AccountPage' => (object) [
+      'user/account/page' => (object) [
         'url' => 'https://www.instagram.com/{user}',
         'type' => 'dom',
         'model' => 'Instagram\\Models\\Account'
       ],
 
-      'User/AccountJSON' => (object) [
+      'user/account/json' => (object) [
         'url' => 'https://www.instagram.com/{user}/?__a=1',
         'type' => 'json',
         'model' => 'Instagram\\Models\\Account'

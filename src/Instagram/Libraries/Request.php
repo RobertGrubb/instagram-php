@@ -19,6 +19,11 @@ class Request {
   private $dom = null;
 
   /**
+   * @class Instagram\Libraries\JSONResponse
+   */
+  private $json = null;
+
+  /**
    * Scraper configuration
    */
   private $config    = null;
@@ -34,6 +39,7 @@ class Request {
     $this->endpoints = new Endpoints();
     $this->config = $config;
     $this->dom = new DOMResponse();
+    $this->json = new JSONResponse();
     return $this;
   }
 
@@ -110,16 +116,15 @@ class Request {
 		if (empty($response)) return [ 'error' => 'No response' ];
 
     if ($this->endpointData->type === 'dom') {
-      $response = $this->dom->set($response)->pick($this->endpointDataKey);
+      $response = $this->dom
+        ->set($response)
+        ->data($this->endpointDataKey);
     } else {
 
       // Decode the response
-      $response = json_decode($response);
-    }
-
-    if (isset($this->endpointData->model)) {
-      $model = new $this->endpointData->model;
-      $response = $model->set($this->endpointDataKey, $response);
+      $response = $this->json
+        ->set($response)
+        ->data($this->endpointDataKey);
     }
 
     // Return the response.

@@ -1,6 +1,6 @@
 <?php
 
-namespace Instagram\Models;
+namespace Instagram\Core\Models;
 
 class Account
 {

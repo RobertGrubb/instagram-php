@@ -1,14 +1,17 @@
 <?php
 
-namespace Instagram\Libraries;
+namespace Instagram\Core\Response;
 
-use Instagram\Exceptions\InstagramException;
+// Exceptions
+use Instagram\Core\Exceptions\InstagramException;
 
-use Instagram\Validations\AccountValidation;
+// Validations
+use Instagram\Core\Validations\AccountValidation;
 
-use Instagram\Models\Account;
+// Models
+use Instagram\Core\Models\Account;
 
-class JSONResponse {
+class JSON {
 
   private $data;
   private $json;
@@ -21,6 +24,10 @@ class JSONResponse {
   public function data ($type) {
 
     switch ($type) {
+
+      case 'user/api/json':
+        $this->data = $this->json;
+        break;
 
       case 'user/account/json':
         $Validator = new AccountValidation;

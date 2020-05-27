@@ -1,16 +1,19 @@
 <?php
 
-namespace Instagram\Libraries;
+namespace Instagram\Core\Response;
 
-use Instagram\Exceptions\InstagramException;
+// Exceptions
+use Instagram\Core\Exceptions\InstagramException;
 
-use Instagram\Validations\AccountValidation;
-use Instagram\Validations\MediaValidation;
+// Validations
+use Instagram\Core\Validations\AccountValidation;
+use Instagram\Core\Validations\MediaValidation;
 
-use Instagram\Models\Account;
-use Instagram\Models\Media;
+// Models
+use Instagram\Core\Models\Account;
+use Instagram\Core\Models\Media;
 
-class DOMResponse {
+class DOM {
 
   private $data;
   private $dom;

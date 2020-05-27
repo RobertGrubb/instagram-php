@@ -1,8 +1,8 @@
 <?php
 
-namespace Instagram\Validations;
+namespace Instagram\Core\Validations;
 
-use Instagram\Exceptions\InstagramException;
+use Instagram\Core\Exceptions\InstagramException;
 
 /**
  * Validation takes in the raw data, verifies

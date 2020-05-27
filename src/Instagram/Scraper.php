@@ -2,8 +2,8 @@
 
 namespace Instagram;
 
-use Instagram\Libraries\Request;
-use Instagram\Exceptions\InstagramException;
+use Instagram\Core\Libraries\Request;
+use Instagram\Core\Exceptions\InstagramException;
 
 class Scraper
 {
@@ -32,38 +32,31 @@ class Scraper
      * Instantiate the request instance.
      */
     $this->request = new Request($this->config);
+
+    /**
+     * Initialize the requests
+     */
+    $this->_initialize();
   }
 
   /**
-   * Get account data
-   * @param  string $username
-   * @param  string $src 'Page', 'JSON'
+   * Initializes the different requests
+   * classes that need to be loaded for the
+   * scraper.
+   *
+   * Account example: $scraper->account->get('test');
+   * Media example: $scraper->media->get('code');
    */
-  public function account ($username = null, $src = 'page') {
-    if (is_null($username)) throw new InstagramException('No username provided');
+  private function _initialize() {
 
-    $response = $this->request
-      ->build('user/account/' . $src, [ 'user' => $username ])
-      ->call();
+    $this->account = new \Instagram\Requests\AccountRequests(
+      $this->request
+    );
 
-    return $response;
+    $this->media   = new \Instagram\Requests\MediaRequests(
+      $this->request
+    );
   }
-
-  /**
-   * Get account data
-   * @param  string $username
-   * @param  string $src 'Page', 'JSON'
-   */
-  public function media ($code = null, $src = 'page') {
-    if (is_null($code)) throw new InstagramException('No code provided');
-
-    $response = $this->request
-      ->build('media/' . $src, [ 'code' => $code ])
-      ->call();
-
-    return $response;
-  }
-
 
   /**
    * Get a configuration variable from the
@@ -78,17 +71,29 @@ class Scraper
    * Sets the default class configuration
    */
   private function _setInitial ($config) {
+    $this->config = (object) [];
+
     if (!is_null($config)) {
       if (!is_array($config)) return false;
 
       foreach ($config as $key => $val) {
         $this->set($key, $val);
       }
-    } else {
-      $this->config = (object) [];
     }
 
     return $this;
+  }
+
+  private function log($data = '') {
+    $debug = (isset($this->config->debug) ? $this->config->debug : false);
+
+    if ($debug) {
+      if (is_array($data) || is_object($data)) {
+        print_r($data);
+      } else {
+        echo $data . PHP_EOL;
+      }
+    }
   }
 
   /**
@@ -96,6 +101,9 @@ class Scraper
    */
   public function set ($var, $val) {
     $this->config->{$var} = $val;
+
+    // Update the request class
+    if (!is_null($this->request)) $this->request->set($var, $val);
   }
 
 }

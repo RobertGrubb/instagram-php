@@ -45,6 +45,39 @@ class AccountRequests
   /**
    * Gets recent medias from the account's profile.
    */
+  public function mediaWithTag ($username = null, $hashtag = null) {
+    if (is_null($username)) throw new InstagramException('No username provided');
+    if (is_null($hashtag)) throw new InstagramException('No hashtag provided');
+
+    try {
+      $response = $this->request
+        ->build('user/medias/page', [ 'user' => $username ])
+        ->call();
+
+      // Get the medias
+      $medias = $response->medias;
+
+      // Reset the response medias array
+      $response->medias = [];
+
+      // Itreate through each, check for the tag.
+      foreach ($medias as $media) {
+
+        // If the caption contains the tag, set the variable
+        if (strpos(strtolower($media->caption), trim(strtolower($hashtag))) !== false) {
+          $response->medias[] = $media;
+        }
+      }
+    } catch (InstagramException $e) {
+      return (object) [ 'error' => $e->getMessage() ];
+    }
+
+    return $response;
+  }
+
+  /**
+   * Gets recent medias from the account's profile.
+   */
   public function recentMedia ($username = null) {
     if (is_null($username)) throw new InstagramException('No username provided');
 

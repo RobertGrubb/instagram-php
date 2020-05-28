@@ -11,6 +11,7 @@ use Instagram\Core\Validations\MediaValidation;
 
 // Models
 use Instagram\Core\Models\Account;
+use Instagram\Core\Models\AccountMedias;
 use Instagram\Core\Models\Media;
 
 class DOM {
@@ -26,6 +27,14 @@ class DOM {
   public function data ($type) {
 
     switch ($type) {
+
+      case 'user/medias/page':
+        $sharedData = $this->getSharedData();
+        $Validator = new AccountValidation;
+        $Model     = new AccountMedias;
+        $data = $Validator->run($type, $sharedData);
+        $this->data = $Model->set($type, $data);
+        break;
 
       case 'user/account/page':
         $sharedData = $this->getSharedData();

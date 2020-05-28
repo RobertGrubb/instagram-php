@@ -43,6 +43,23 @@ class AccountRequests
   }
 
   /**
+   * Gets recent medias from the account's profile.
+   */
+  public function recentMedia ($username = null) {
+    if (is_null($username)) throw new InstagramException('No username provided');
+
+    try {
+      $response = $this->request
+        ->build('user/medias/page', [ 'user' => $username ])
+        ->call();
+    } catch (InstagramException $e) {
+      return (object) [ 'error' => $e->getMessage() ];
+    }
+
+    return $response;
+  }
+
+  /**
    * Get account data
    * @param  string $username
    * @param  string $src 'Page', 'JSON'

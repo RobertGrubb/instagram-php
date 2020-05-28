@@ -23,6 +23,12 @@ class Endpoints {
         'type' => 'dom'
       ],
 
+      'user/medias/page' => (object) [
+        'platform' => 'www.instagram.com',
+        'url' => 'https://www.instagram.com/{user}',
+        'type' => 'dom'
+      ],
+
       'user/account/json' => (object) [
         'platform' => 'www.instagram.com',
         'url' => 'https://www.instagram.com/{user}/?__a=1',

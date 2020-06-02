@@ -15,7 +15,7 @@ class GraphQueries {
         'variables' => [
           'username' => null,
           'user_id' => null,
-          'include_chaining' => true,
+          'include_chaining' => false,
           'include_reel' => true,
           'include_suggested_users' => false,
           'include_logged_out_extras' => false,

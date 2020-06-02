@@ -31,129 +31,69 @@ class Media
   public $commentsCount;
 
   /**
-   * Set based on endpoint
+   * Convert raw data to the model structure
    */
-  public function set ($endpoint, $media) {
+  public function convert ($media) {
     $instance = new self();
 
-
-    switch ($endpoint) {
-
-      case 'account-media/page':
-
-        // ID and Type
-        $instance->id = $media['id'];
-        $instance->type = $media['is_video'] ? 'video' : 'image';
-
-        // Video data
-        if ($media['is_video']) {
-            $instance->type = 'video';
-            $instance->videoStandardResolutionUrl = $media['video_url'];
-            $instance->videoViews = $media['video_view_count'];
-        }
-
-        if (isset($media['caption_is_edited'])) $instance->captionIsEdited = $media['caption_is_edited'];
-        if (isset($media['is_ad'])) $instance->isAd = $media['is_ad'];
-
-        $instance->shortcode = $media['shortcode'];
-        $instance->code = $media['shortcode'];
-        $instance->link = 'https://www.instagram.com/p/' . $instance->shortcode;
-        $instance->imageStandardResolutionUrl = isset($media['thumbnail_resources'][4]) ? $media['thumbnail_resources'][4]['src'] : null;
-        $instance->imageLowResolutionUrl = isset($media['thumbnail_resources'][3]) ? $media['thumbnail_resources'][3]['src'] : null;
-        $instance->imageHighResolutionUrl = $media['display_url'];
-        $instance->imageThumbnailUrl = $media['thumbnail_src'];
-        $instance->createdTime = $media['taken_at_timestamp'];
-
-        $instance->commentsCount = 0;
-
-        if (isset($media['edge_media_to_comment'])) {
-            if (isset($media['edge_media_to_comment']['count'])) {
-                $instance->commentsCount = $media['edge_media_to_comment']['count'];
-            }
-        }
-
-        if (isset($media['edge_media_to_parent_comment'])) {
-            if (isset($media['edge_media_to_parent_comment']['count'])) {
-                $instance->commentsCount = $media['edge_media_to_parent_comment']['count'];
-            }
-        }
-
-        $instance->likesCount = $media['edge_media_preview_like']['count'];
-        $instance->ownerId = $media['owner']['id'];
-        
-        if (isset($media['edge_media_to_caption']['edges'][0]['node']['text'])) {
-            $instance->caption = $media['edge_media_to_caption']['edges'][0]['node']['text'];
-        }
-
-        // Location data
-        if (isset($media['location']['id'])) {
-            $instance->locationId = $media['location']['id'];
-        }
-
-        if (isset($media['location']['name'])) {
-            $instance->locationName = $media['location']['name'];
-        }
-
-        break;
-
-      case 'media/page':
-        $instance->id = $media['id'];
-        $instance->type = 'image';
-        if ($media['is_video']) {
-            $instance->type = 'video';
-            $instance->videoStandardResolutionUrl = $media['video_url'];
-            $instance->videoViews = $media['video_view_count'];
-        }
-
-
-        if (isset($media['caption_is_edited'])) {
-          $instance->captionIsEdited = $media['caption_is_edited'];
-        }
-
-        if (isset($media['is_ad'])) {
-          $instance->isAd = $media['is_ad'];
-        }
-
-        $instance->createdTime = $media['taken_at_timestamp'];
-        $instance->shortcode = $media['shortcode'];
-        $instance->code = $media['shortcode'];
-
-        $instance->link = 'https://www.instagram.com/p/' . $instance->shortcode;
-
-        $instance->commentsCount = 0;
-
-        if (isset($media['edge_media_to_comment'])) {
-          if (isset($media['edge_media_to_comment']['count'])) {
-            $instance->commentsCount = $media['edge_media_to_comment']['count'];
-          }
-        }
-
-        if (isset($media['edge_media_to_parent_comment'])) {
-          if (isset($media['edge_media_to_parent_comment']['count'])) {
-            $instance->commentsCount = $media['edge_media_to_parent_comment']['count'];
-          }
-        }
-
-        $instance->likesCount = $media['edge_media_preview_like']['count'];
-        $images = $this->getImageUrlsFromDisplayResources($media['display_resources']);
-        $instance->imageStandardResolutionUrl = $images['standard'];
-        $instance->imageLowResolutionUrl = $images['low'];
-        $instance->imageHighResolutionUrl = $images['high'];
-        $instance->imageThumbnailUrl = $images['thumbnail'];
-
-        if (isset($media['edge_media_to_caption']['edges'][0]['node']['text'])) {
-          $instance->caption = $media['edge_media_to_caption']['edges'][0]['node']['text'];
-        }
-
-        if (isset($media['location']['id'])) {
-          $instance->locationId = $media['location']['id'];
-        }
-
-        if (isset($media['location']['name'])) {
-          $instance->locationName = $media['location']['name'];
-        }
-        break;
+    $instance->id = $media->id;
+    $instance->type = 'image';
+    if ($media->is_video) {
+        $instance->type = 'video';
+        $instance->videoStandardResolutionUrl = $media->video_url;
+        $instance->videoViews = $media->video_view_count;
     }
+
+
+    if (isset($media->caption_is_edited)) {
+      $instance->captionIsEdited = $media->caption_is_edited;
+    }
+
+    if (isset($media->is_ad)) {
+      $instance->isAd = $media->is_ad;
+    }
+
+    $instance->createdTime = $media->taken_at_timestamp;
+    $instance->shortcode = $media->shortcode;
+    $instance->code = $media->shortcode;
+
+    $instance->link = 'https://www.instagram.com/p/' . $instance->shortcode;
+
+    $instance->commentsCount = 0;
+
+    if (isset($media->edge_media_to_comment)) {
+      if (isset($media->edge_media_to_comment->count)) {
+        $instance->commentsCount = $media->edge_media_to_comment->count;
+      }
+    }
+
+    if (isset($media->edge_media_to_parent_comment)) {
+      if (isset($media->edge_media_to_parent_comment->count)) {
+        $instance->commentsCount = $media->edge_media_to_parent_comment->count;
+      }
+    }
+
+    $instance->likesCount = $media->edge_media_preview_like->count;
+    $images = $this->getImageUrlsFromDisplayResources($media->display_resources);
+    $instance->imageStandardResolutionUrl = $images['standard'];
+    $instance->imageLowResolutionUrl = $images['low'];
+    $instance->imageHighResolutionUrl = $images['high'];
+    $instance->imageThumbnailUrl = $images['thumbnail'];
+
+    if (isset($media->edge_media_to_caption->edges[0]->node->text)) {
+      $instance->caption = $media->edge_media_to_caption->edges[0]->node->text;
+    }
+
+    if (isset($media->location->id)) {
+      $instance->locationId = $media->location->id;
+    }
+
+    if (isset($media->location->name)) {
+      $instance->locationName = $media->location->name;
+    }
+
+    $instance->owner = $media->owner;
+    $instance->ownerId = $media->owner->id;
 
     return $instance;
   }
@@ -162,20 +102,20 @@ class Media
     $urls = [];
 
     foreach ($displayResources as $image) {
-      if ($image['config_width'] == 640) {
-        $urls['thumbnail'] = $image['src'];
+      if ($image->config_width == 640) {
+        $urls['thumbnail'] = $image->src;
       }
 
-      if ($image['config_width'] == 640) {
-        $urls['low'] = $image['src'];
+      if ($image->config_width == 640) {
+        $urls['low'] = $image->src;
       }
 
-      if ($image['config_width'] == 750) {
-        $urls['standard'] = $image['src'];
+      if ($image->config_width == 750) {
+        $urls['standard'] = $image->src;
       }
 
-      if ($image['config_width'] == 1080) {
-        $urls['high'] = $image['src'];
+      if ($image->config_width == 1080) {
+        $urls['high'] = $image->src;
       }
     }
 

@@ -5,6 +5,10 @@ namespace Instagram\Requests;
 use Instagram\Core\Libraries\Request;
 use Instagram\Core\Exceptions\InstagramException;
 
+use Instagram\Core\Resources\GraphQueries;
+
+use Instagram\Core\Models\Media;
+
 class MediaRequests
 {
 
@@ -12,35 +16,28 @@ class MediaRequests
    * Request instance holder
    */
   private $request = null;
-
-  /**
-   * Debug logger
-   */
-  private $log = null;
+  private $GraphQueries = null;
 
   /**
    * Class constructor
    */
   public function __construct($request) {
     $this->request = $request;
+    $this->queries = new GraphQueries();
   }
 
-  /**
-   * Get media data
-   * @param  string $username
-   * @param  string $src 'Page', 'JSON'
-   */
-  public function get ($code = null, $src = 'page') {
-    if (is_null($code)) throw new InstagramException('No code provided');
+  public function get($vars = []) {
+    $query = $this->queries->get('media');
+    $response = $this->request->build($query, $vars)->request();
 
-    try {
-      $response = $this->request
-        ->build('media/' . $src, [ 'code' => $code ])
-        ->call();
-    } catch (InstagramException $e) {
-      return (object) [ 'error' => $e->getMessage() ];
-    }
+    print_r($response);
 
-    return $response;
+    if (!isset($response->data)) return false;
+    if (!isset($response->data->shortcode_media)) return false;
+
+    $model = new Media();
+    $item = $model->convert($response->data->shortcode_media);
+
+    return $item;
   }
 }

@@ -5,7 +5,7 @@ namespace Instagram\Core\Libraries;
 use Instagram\Core\Resources\Endpoints;
 use Instagram\Core\Exceptions\InstagramException;
 
-class Request {
+class DomRequest {
 
   public $headers = [
     'accept' => '*/*',
@@ -13,27 +13,27 @@ class Request {
     'X-Requested-With' => 'XMLHttpRequest'
   ];
 
-  public $query;
+  public $domHeaders = [
+    'authority'       => 'www.instagram.com',
+    'cache-control'   => 'max-age=0',
+    'upgrade-insecure-requests' => '1',
+    'accept'          => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+    'sec-fetch-site'  => 'same-orgin',
+    'sec-fetch-mode'  => 'navigate',
+    'sec-fetch-user'  => '?1',
+    'sec-fetch-dest'  => 'document',
+    'accept-language' => 'en-US,en;q=0.9',
+    'user-agent'      => 'Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; 828x1792; 165586599)'
+  ];
 
-  public function __construct() {
-    $this->headers['x-csrftoken'] = md5(uniqid());
-  }
-
-  public function build($query, $vars) {
-    $variables = array_merge($query['variables'], $vars);
-    $query['variables'] = json_encode($variables);
-    $this->query = $query;
-    return $this;
-  }
-
-  public function request () {
+  public function request ($url) {
 
 	  // Initiate CURL
 	  $ch = curl_init();
 
-		$endpoint = 'https://www.instagram.com/graphql/query/';
+		$endpoint = 'https://www.instagram.com/';
 
-    $endpoint = $endpoint . '?' . http_build_query($this->query);
+    $endpoint = $endpoint . $url;
 
     $timeout = isset($this->config->timeout) ? $this->config->timeout : 30;
 
@@ -80,7 +80,7 @@ class Request {
 	  curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 	  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLINFO_HEADER_OUT, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $this->headers);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $this->domHeaders);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
     // Get the response
@@ -92,8 +92,22 @@ class Request {
     // Close CURL
     curl_close ($ch);
 
-    // Return the response.
-    return json_decode($response);
+    if ($info['http_code'] !== 200) {
+      throw new InstagramException("Code " . $info['http_code'] . " returned");
+    }
+
+    $sharedData = $this->getSharedData($response);
+
+    return $sharedData;
 	}
+
+  private function getSharedData ($html) {
+    preg_match('/window._sharedData\s\=\s(.*?)\;<\/script>/', $html, $data);
+
+    if (!isset($data[1])) return false;
+
+    $sharedData = json_decode($data[1], true, 512, JSON_BIGINT_AS_STRING);
+    return $sharedData;
+  }
 
 }

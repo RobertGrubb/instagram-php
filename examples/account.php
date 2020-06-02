@@ -24,6 +24,6 @@ $scraper = new Scraper($config);
  * page scrapes from the document on the user's profile,
  * json calls the __a=1 route for the json response.
  */
-$data = $scraper->account->get('_mattGrubb', 'json');
+$data = $scraper->account->get('_mattGrubb');
 
 print_r($data);

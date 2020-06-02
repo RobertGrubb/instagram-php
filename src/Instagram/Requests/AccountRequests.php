@@ -3,7 +3,14 @@
 namespace Instagram\Requests;
 
 use Instagram\Core\Libraries\Request;
+use Instagram\Core\Libraries\DomRequest;
+
 use Instagram\Core\Exceptions\InstagramException;
+
+use Instagram\Core\Resources\GraphQueries;
+
+use Instagram\Core\Models\Media;
+use Instagram\Core\Models\Account;
 
 class AccountRequests
 {
@@ -12,102 +19,49 @@ class AccountRequests
    * Request instance holder
    */
   private $request = null;
-
-  /**
-   * Debug logger
-   */
-  private $log = null;
+  private $GraphQueries = null;
 
   /**
    * Class constructor
    */
   public function __construct($request) {
     $this->request = $request;
+    $this->domRequest = new DomRequest();
+    $this->queries = new GraphQueries();
   }
 
-  /**
-   * Get account data by id
-   */
-  public function getById ($id) {
-    if (is_null($id)) throw new InstagramException('No user id provided');
+  public function get($username) {
+    $url = trim($username);
+    $response = $this->domRequest->request($url);
 
-    try {
-      $response = $this->request
-        ->build('user/api/json', [ 'id' => $id ])
-        ->call();
-    } catch (InstagramException $e) {
-      return (object) [ 'error' => $e->getMessage() ];
+    if (!isset($response['entry_data']['ProfilePage'][0]['graphql']['user'])) {
+      throw new InstagramException('Data not valid');
     }
 
-    return $response;
+    $model = new Account();
+    $account = $model->convert($response['entry_data']['ProfilePage'][0]['graphql']['user']);
+
+    return $account;
   }
 
-  /**
-   * Gets recent medias from the account's profile.
-   */
-  public function mediaWithTag ($username = null, $hashtag = null) {
-    if (is_null($username)) throw new InstagramException('No username provided');
-    if (is_null($hashtag)) throw new InstagramException('No hashtag provided');
+  public function medias($vars = []) {
+    $query = $this->queries->get('feed');
+    $response = $this->request->build($query, $vars)->request();
 
-    try {
-      $response = $this->request
-        ->build('user/medias/page', [ 'user' => $username ])
-        ->call();
+    if (!isset($response->data)) return false;
+    if (!isset($response->data->user)) return false;
+    if (!isset($response->data->user->edge_owner_to_timeline_media)) return false;
+    if (!isset($response->data->user->edge_owner_to_timeline_media->edges)) return false;
 
-      // Get the medias
-      $medias = $response->medias;
+    $medias = $response->data->user->edge_owner_to_timeline_media->edges;
 
-      // Reset the response medias array
-      $response->medias = [];
+    $items = [];
 
-      // Itreate through each, check for the tag.
-      foreach ($medias as $media) {
-
-        // If the caption contains the tag, set the variable
-        if (strpos(strtolower($media->caption), trim(strtolower($hashtag))) !== false) {
-          $response->medias[] = $media;
-        }
-      }
-    } catch (InstagramException $e) {
-      return (object) [ 'error' => $e->getMessage() ];
+    foreach ($medias as $media) {
+      $model = new Media();
+      $items[] = $model->convert($media->node);
     }
 
-    return $response;
-  }
-
-  /**
-   * Gets recent medias from the account's profile.
-   */
-  public function recentMedia ($username = null) {
-    if (is_null($username)) throw new InstagramException('No username provided');
-
-    try {
-      $response = $this->request
-        ->build('user/medias/page', [ 'user' => $username ])
-        ->call();
-    } catch (InstagramException $e) {
-      return (object) [ 'error' => $e->getMessage() ];
-    }
-
-    return $response;
-  }
-
-  /**
-   * Get account data
-   * @param  string $username
-   * @param  string $src 'Page', 'JSON'
-   */
-  public function get ($username = null, $src = 'page') {
-    if (is_null($username)) throw new InstagramException('No username provided');
-
-    try {
-      $response = $this->request
-        ->build('user/account/' . $src, [ 'user' => $username ])
-        ->call();
-    } catch (InstagramException $e) {
-      return (object) [ 'error' => $e->getMessage() ];
-    }
-
-    return $response;
+    return $items;
   }
 }

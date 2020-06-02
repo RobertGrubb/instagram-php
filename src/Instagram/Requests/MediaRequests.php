@@ -16,19 +16,21 @@ class MediaRequests
    * Request instance holder
    */
   private $request = null;
+  private $domRequest = null;
   private $GraphQueries = null;
 
   /**
    * Class constructor
    */
-  public function __construct($request) {
+  public function __construct($request, $domRequest) {
     $this->request = $request;
+    $this->domRequest = $domRequest;
     $this->queries = new GraphQueries();
   }
 
-  public function get($vars = []) {
+  public function get($vars = [], $headers = []) {
     $query = $this->queries->get('media');
-    $response = $this->request->build($query, $vars)->request();
+    $response = $this->request->build($query, $vars)->request($headers);
 
     if (!isset($response->data)) return false;
     if (!isset($response->data->shortcode_media)) return false;

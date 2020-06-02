@@ -24,29 +24,29 @@ class AccountRequests
   /**
    * Class constructor
    */
-  public function __construct($request) {
+  public function __construct($request, $domRequest) {
     $this->request = $request;
-    $this->domRequest = new DomRequest();
+    $this->domRequest = $domRequest;
     $this->queries = new GraphQueries();
   }
 
-  public function get($username) {
-    $url = trim($username);
-    $response = $this->domRequest->request($url);
+  public function get($vars = [], $headers = []) {
+    $query = $this->queries->get('user');
+    $response = $this->request->build($query, $vars)->request($headers);
 
-    if (!isset($response['entry_data']['ProfilePage'][0]['graphql']['user'])) {
-      throw new InstagramException('Data not valid');
-    }
+    if (!isset($response->data)) return false;
+    if (!isset($response->data->user)) return false;
+    if (!isset($response->data->user->reel)) return false;
+    if (!isset($response->data->user->reel->user)) return false;
 
-    $model = new Account();
-    $account = $model->convert($response['entry_data']['ProfilePage'][0]['graphql']['user']);
+    $userData = $response->data->user->reel->user;
 
-    return $account;
+    return $userData;
   }
 
-  public function medias($vars = []) {
+  public function medias($vars = [], $headers = []) {
     $query = $this->queries->get('feed');
-    $response = $this->request->build($query, $vars)->request();
+    $response = $this->request->build($query, $vars)->request($headers);
 
     if (!isset($response->data)) return false;
     if (!isset($response->data->user)) return false;

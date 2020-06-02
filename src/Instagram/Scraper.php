@@ -3,6 +3,7 @@
 namespace Instagram;
 
 use Instagram\Core\Libraries\Request;
+use Instagram\Core\Libraries\DomRequest;
 use Instagram\Core\Exceptions\InstagramException;
 
 class Scraper
@@ -18,6 +19,8 @@ class Scraper
    */
   private $request = null;
 
+  private $domRequest = null;
+
   /**
    * Class constructor
    */
@@ -32,6 +35,7 @@ class Scraper
      * Instantiate the request instance.
      */
     $this->request = new Request($this->config);
+    $this->domRequest = new DomRequest($this->config);
 
     /**
      * Initialize the requests
@@ -50,11 +54,13 @@ class Scraper
   private function _initialize() {
 
     $this->account = new \Instagram\Requests\AccountRequests(
-      $this->request
+      $this->request,
+      $this->domRequest
     );
 
     $this->media   = new \Instagram\Requests\MediaRequests(
-      $this->request
+      $this->request,
+      $this->domRequest
     );
   }
 

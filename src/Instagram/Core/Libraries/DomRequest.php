@@ -7,6 +7,8 @@ use Instagram\Core\Exceptions\InstagramException;
 
 class DomRequest {
 
+  public $config;
+
   public $headers = [
     'accept' => '*/*',
     'X-IG-App-ID' => '936619743392459',
@@ -23,10 +25,16 @@ class DomRequest {
     'sec-fetch-user'  => '?1',
     'sec-fetch-dest'  => 'document',
     'accept-language' => 'en-US,en;q=0.9',
+    'accept-encoding' => 'gzip, deflate',
+    'connection'      => 'keep-alive',
     'user-agent'      => 'Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; 828x1792; 165586599)'
   ];
 
-  public function request ($url) {
+  public function __construct ($config) {
+    $this->config = $config;
+  }
+
+  public function request ($url, $customHeaders = []) {
 
 	  // Initiate CURL
 	  $ch = curl_init();
@@ -40,6 +48,7 @@ class DomRequest {
     // Set the URL
     curl_setopt($ch, CURLOPT_URL, $endpoint);
     curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+    curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
 
     // Proxy setup:
     if (isset($this->config->proxy)) {
@@ -80,11 +89,13 @@ class DomRequest {
 	  curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 	  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLINFO_HEADER_OUT, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $this->domHeaders);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array_merge($this->domHeaders, $customHeaders));
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
     // Get the response
     $response = curl_exec($ch);
+
+    var_dump($response);
 
     // Curl info
     $info = curl_getinfo($ch);

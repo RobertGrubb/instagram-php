@@ -21,12 +21,16 @@ class Request {
 
   public function build($query, $vars) {
     $variables = array_merge($query['variables'], $vars);
+
+    // Remove any nulls
+    foreach ($variables as $key => $val) if (is_null($val)) unset($variables[$key]);
+
     $query['variables'] = json_encode($variables);
     $this->query = $query;
     return $this;
   }
 
-  public function request () {
+  public function request ($customHeaders = []) {
 
 	  // Initiate CURL
 	  $ch = curl_init();
@@ -80,7 +84,7 @@ class Request {
 	  curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 	  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLINFO_HEADER_OUT, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $this->headers);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array_merge($this->headers, $customHeaders));
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
     // Get the response

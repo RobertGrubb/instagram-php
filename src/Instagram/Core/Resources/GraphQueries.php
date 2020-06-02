@@ -10,6 +10,20 @@ class GraphQueries {
 
     $this->list = [
 
+      'user' => [
+        'query_hash' => 'ad99dd9d3646cc3c0dda65debcd266a7',
+        'variables' => [
+          'username' => null,
+          'user_id' => null,
+          'include_chaining' => true,
+          'include_reel' => true,
+          'include_suggested_users' => false,
+          'include_logged_out_extras' => false,
+          'include_highlight_reels' => false,
+          'include_related_profiles' => false
+        ]
+      ],
+
       'media' => [
         'query_hash' => '477b65a610463740ccdb83135b2014db',
         'variables' => [

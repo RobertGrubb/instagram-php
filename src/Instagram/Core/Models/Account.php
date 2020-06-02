@@ -19,41 +19,19 @@ class Account
   /**
    * Set based on endpoint
    */
-  public function set ($endpoint, $user) {
+  public function convert ($user) {
     $instance = new self();
-
-
-    switch ($endpoint) {
-
-      case 'user/account/json':
-        $instance->username = $user->username;
-        $instance->followsCount = $user->edge_follow->count;
-        $instance->followedByCount = $user->edge_followed_by->count;
-        $instance->profilePicUrl = $user->profile_pic_url;
-        $instance->id = $user->id;
-        $instance->biography = $user->biography;
-        $instance->fullName = $user->full_name;
-        $instance->mediaCount = $user->edge_owner_to_timeline_media->count;
-        $instance->isPrivate = $user->is_private;
-        $instance->externalUrl = $user->external_url;
-        $instance->isVerified = $user->is_verified;
-        break;
-
-      case 'user/account/page':
-        $instance->username = $user['username'];
-        $instance->followsCount = $user['edge_follow']['count'];
-        $instance->followedByCount = $user['edge_followed_by']['count'];
-        $instance->profilePicUrl = $user['profile_pic_url'];
-        $instance->id = $user['id'];
-        $instance->biography = $user['biography'];
-        $instance->fullName = $user['full_name'];
-        $instance->mediaCount = $user['edge_owner_to_timeline_media']['count'];
-        $instance->isPrivate = $user['is_private'];
-        $instance->externalUrl = $user['external_url'];
-        $instance->isVerified = $user['is_verified'];
-        break;
-    }
-
+    $instance->username = $user['username'];
+    $instance->followsCount = $user['edge_follow']['count'];
+    $instance->followedByCount = $user['edge_followed_by']['count'];
+    $instance->profilePicUrl = $user['profile_pic_url'];
+    $instance->id = $user['id'];
+    $instance->biography = $user['biography'];
+    $instance->fullName = $user['full_name'];
+    $instance->mediaCount = $user['edge_owner_to_timeline_media']['count'];
+    $instance->isPrivate = $user['is_private'];
+    $instance->externalUrl = $user['external_url'];
+    $instance->isVerified = $user['is_verified'];
     return $instance;
   }
 }

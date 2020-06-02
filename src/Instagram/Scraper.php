@@ -84,18 +84,6 @@ class Scraper
     return $this;
   }
 
-  private function log($data = '') {
-    $debug = (isset($this->config->debug) ? $this->config->debug : false);
-
-    if ($debug) {
-      if (is_array($data) || is_object($data)) {
-        print_r($data);
-      } else {
-        echo $data . PHP_EOL;
-      }
-    }
-  }
-
   /**
    * Set the class configuration variable.
    */

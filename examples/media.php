@@ -5,8 +5,11 @@ require_once __DIR__ . '/../src/Instagram.php';
 
 use Instagram\Scraper;
 
+$config = require_once __DIR__ . '/env.php';
+
+
 // Instantiate Instagram Scraper library
-$scraper = new Scraper();
+$scraper = new Scraper($config);
 
 /**
  * Call the below with:
@@ -19,6 +22,6 @@ $scraper = new Scraper();
  * page scrapes from the document on the user's profile,
  * json calls the __a=1 route for the json response.
  */
-$data = $scraper->media->get('CAdO-8MjgHM');
+$data = $scraper->media->get([ 'shortcode' => 'CAdO-8MjgHM' ]);
 
 print_r($data);

@@ -14,6 +14,6 @@ use Instagram\Scraper;
 $scraper = new Scraper($config);
 
 // Gets user's most recent medias from the profile page.
-$data = $scraper->account->recentMedia('_mattGrubb');
+$data = $scraper->account->medias([ 'id' => 3926381369 ]);
 
 print_r($data);

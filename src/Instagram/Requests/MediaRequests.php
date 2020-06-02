@@ -30,8 +30,6 @@ class MediaRequests
     $query = $this->queries->get('media');
     $response = $this->request->build($query, $vars)->request();
 
-    print_r($response);
-
     if (!isset($response->data)) return false;
     if (!isset($response->data->shortcode_media)) return false;
 

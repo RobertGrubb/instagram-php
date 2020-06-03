@@ -2,12 +2,12 @@
 
 namespace Instagram\Requests;
 
-use Instagram\Core\Libraries\Request;
-use Instagram\Core\Libraries\DomRequest;
-
 use Instagram\Core\Exceptions\InstagramException;
 
 use Instagram\Core\Resources\GraphQueries;
+use Instagram\Core\Resources\Endpoints;
+
+use Instagram\Core\Normalize\UserSearch;
 
 use Instagram\Core\Models\Media;
 use Instagram\Core\Models\Account;
@@ -18,35 +18,75 @@ class AccountRequests
   /**
    * Request instance holder
    */
-  private $request = null;
+  private $graphRequest = null;
+  private $domRequest   = null;
+  private $jsonRequest  = null;
+  private $apiRequest   = null;
+  private $endpoints    = null;
   private $GraphQueries = null;
 
   /**
    * Class constructor
    */
-  public function __construct($request) {
-    $this->request = $request;
-    $this->domRequest = new DomRequest();
+  public function __construct($graphRequest, $domRequest, $jsonRequest, $apiRequest) {
+    $this->graphRequest = $graphRequest;
+    $this->domRequest = $domRequest;
+    $this->jsonRequest = $jsonRequest;
+    $this->apiRequest = $apiRequest;
+    $this->endpoints = new Endpoints();
     $this->queries = new GraphQueries();
   }
 
-  public function get($username) {
-    $url = trim($username);
-    $response = $this->domRequest->request($url);
+  public function search ($vars = [], $headers = []) {
+    $defaultVars = [ 'count' => 10 ];
+    $vars = array_merge($vars, $defaultVars);
+    if (!isset($vars['query'])) return false;
+    $endpoint = $this->endpoints->get('user-search', $vars);
+    $response = $this->jsonRequest->call($endpoint, $headers);
 
-    if (!isset($response['entry_data']['ProfilePage'][0]['graphql']['user'])) {
-      throw new InstagramException('Data not valid');
-    }
+    if (!isset($response->users)) return false;
+    $items = UserSearch::process($response->users);
 
-    $model = new Account();
-    $account = $model->convert($response['entry_data']['ProfilePage'][0]['graphql']['user']);
-
-    return $account;
+    return $items;
   }
 
-  public function medias($vars = []) {
+  public function byId ($id, $headers = []) {
+    $endpoint = $this->endpoints->get('user-id', [ 'id' => $id ]);
+    $response = $this->apiRequest->call($endpoint, $headers);
+    return $response;
+  }
+
+  public function byUsername ($username, $headers = []) {
+    $user = $this->get([ 'username' => $username ], $headers);
+
+    // Sleep between the requests to be safe.
+    sleep(2);
+
+    $response = $this->byId($user->id, $headers);
+
+    $model = new Account();
+    $response = $model->convert($response->user);
+
+    return $response;
+  }
+
+  public function get($vars = [], $headers = []) {
+    $query = $this->queries->get('user');
+    $response = $this->graphRequest->build($query, $vars)->call($headers);
+
+    if (!isset($response->data)) return false;
+    if (!isset($response->data->user)) return false;
+    if (!isset($response->data->user->reel)) return false;
+    if (!isset($response->data->user->reel->user)) return false;
+
+    $userData = $response->data->user->reel->user;
+
+    return $userData;
+  }
+
+  public function medias($vars = [], $headers = []) {
     $query = $this->queries->get('feed');
-    $response = $this->request->build($query, $vars)->request();
+    $response = $this->graphRequest->build($query, $vars)->call($headers);
 
     if (!isset($response->data)) return false;
     if (!isset($response->data->user)) return false;

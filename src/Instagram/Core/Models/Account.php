@@ -21,17 +21,17 @@ class Account
    */
   public function convert ($user) {
     $instance = new self();
-    $instance->username = $user['username'];
-    $instance->followsCount = $user['edge_follow']['count'];
-    $instance->followedByCount = $user['edge_followed_by']['count'];
-    $instance->profilePicUrl = $user['profile_pic_url'];
-    $instance->id = $user['id'];
-    $instance->biography = $user['biography'];
-    $instance->fullName = $user['full_name'];
-    $instance->mediaCount = $user['edge_owner_to_timeline_media']['count'];
-    $instance->isPrivate = $user['is_private'];
-    $instance->externalUrl = $user['external_url'];
-    $instance->isVerified = $user['is_verified'];
+    $instance->username = $user->username;
+    $instance->followsCount = $user->following_count;
+    $instance->followedByCount = $user->follower_count;
+    $instance->profilePicUrl = $user->profile_pic_url;
+    $instance->id = $user->pk;
+    $instance->biography = $user->biography;
+    $instance->fullName = $user->full_name;
+    $instance->mediaCount = $user->media_count;
+    $instance->isPrivate = $user->is_private;
+    $instance->externalUrl = $user->external_url;
+    $instance->isVerified = $user->is_verified;
     return $instance;
   }
 }

@@ -2,7 +2,11 @@
 
 namespace Instagram;
 
-use Instagram\Core\Libraries\Request;
+use Instagram\Core\Libraries\GraphRequest;
+use Instagram\Core\Libraries\DomRequest;
+use Instagram\Core\Libraries\JsonRequest;
+use Instagram\Core\Libraries\ApiRequest;
+
 use Instagram\Core\Exceptions\InstagramException;
 
 class Scraper
@@ -16,7 +20,12 @@ class Scraper
   /**
    * Request instance holder
    */
-  private $request = null;
+  private $graphRequest = null;
+
+  /**
+   * DomRequest instance holder
+   */
+  private $domRequest = null;
 
   /**
    * Class constructor
@@ -27,11 +36,6 @@ class Scraper
      * Set the initial configuration variables.
      */
     $this->_setInitial($config);
-
-    /**
-     * Instantiate the request instance.
-     */
-    $this->request = new Request($this->config);
 
     /**
      * Initialize the requests
@@ -49,12 +53,26 @@ class Scraper
    */
   private function _initialize() {
 
+    /**
+     * Instantiate the request instance.
+     */
+    $this->graphRequest = new GraphRequest($this->config);
+    $this->domRequest   = new DomRequest($this->config);
+    $this->jsonRequest  = new JsonRequest($this->config);
+    $this->apiRequest   = new ApiRequest($this->config);
+
     $this->account = new \Instagram\Requests\AccountRequests(
-      $this->request
+      $this->graphRequest,
+      $this->domRequest,
+      $this->jsonRequest,
+      $this->apiRequest
     );
 
     $this->media   = new \Instagram\Requests\MediaRequests(
-      $this->request
+      $this->graphRequest,
+      $this->domRequest,
+      $this->jsonRequest,
+      $this->apiRequest
     );
   }
 
@@ -90,8 +108,8 @@ class Scraper
   public function set ($var, $val) {
     $this->config->{$var} = $val;
 
-    // Update the request class
-    if (!is_null($this->request)) $this->request->set($var, $val);
+    // Re initialize
+    $this->_initialize();
   }
 
 }

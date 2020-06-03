@@ -14,6 +14,6 @@ use Instagram\Scraper;
 $scraper = new Scraper($config);
 
 
-$data = $scraper->account->byUsername('_mattGrubb', [ 'Cookie: ' . $config['session'] ]);
+$data = $scraper->account->byUsername('nfl', [ 'Cookie: ' . $config['session'] ]);
 
 print_r($data);

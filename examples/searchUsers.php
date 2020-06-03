@@ -13,7 +13,7 @@ use Instagram\Scraper;
 // Instantiate Instagram Scraper library
 $scraper = new Scraper($config);
 
-// Needs a cookie session to work.
-$data = $scraper->account->get([ 'username' => '_mattGrubb' ], [ 'Cookie: ' . $config['session'] ]);
+
+$data = $scraper->account->search([ 'query' => '_mattGrubb' ]);
 
 print_r($data);

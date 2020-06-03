@@ -2,12 +2,12 @@
 
 namespace Instagram\Requests;
 
-use Instagram\Core\Libraries\Request;
-use Instagram\Core\Libraries\DomRequest;
-
 use Instagram\Core\Exceptions\InstagramException;
 
 use Instagram\Core\Resources\GraphQueries;
+use Instagram\Core\Resources\Endpoints;
+
+use Instagram\Core\Normalize\UserSearch;
 
 use Instagram\Core\Models\Media;
 use Instagram\Core\Models\Account;
@@ -18,21 +18,61 @@ class AccountRequests
   /**
    * Request instance holder
    */
-  private $request = null;
+  private $graphRequest = null;
+  private $domRequest   = null;
+  private $jsonRequest  = null;
+  private $apiRequest   = null;
+  private $endpoints    = null;
   private $GraphQueries = null;
 
   /**
    * Class constructor
    */
-  public function __construct($request, $domRequest) {
-    $this->request = $request;
+  public function __construct($graphRequest, $domRequest, $jsonRequest, $apiRequest) {
+    $this->graphRequest = $graphRequest;
     $this->domRequest = $domRequest;
+    $this->jsonRequest = $jsonRequest;
+    $this->apiRequest = $apiRequest;
+    $this->endpoints = new Endpoints();
     $this->queries = new GraphQueries();
+  }
+
+  public function search ($vars = [], $headers = []) {
+    $defaultVars = [ 'count' => 10 ];
+    $vars = array_merge($vars, $defaultVars);
+    if (!isset($vars['query'])) return false;
+    $endpoint = $this->endpoints->get('user-search', $vars);
+    $response = $this->jsonRequest->call($endpoint, $headers);
+
+    if (!isset($response->users)) return false;
+    $items = UserSearch::process($response->users);
+
+    return $items;
+  }
+
+  public function byId ($id, $headers = []) {
+    $endpoint = $this->endpoints->get('user-id', [ 'id' => $id ]);
+    $response = $this->apiRequest->call($endpoint, $headers);
+    return $response;
+  }
+
+  public function byUsername ($username, $headers = []) {
+    $user = $this->get([ 'username' => $username ], $headers);
+
+    // Sleep between the requests to be safe.
+    sleep(2);
+
+    $response = $this->byId($user->id, $headers);
+
+    $model = new Account();
+    $response = $model->convert($response->user);
+
+    return $response;
   }
 
   public function get($vars = [], $headers = []) {
     $query = $this->queries->get('user');
-    $response = $this->request->build($query, $vars)->request($headers);
+    $response = $this->graphRequest->build($query, $vars)->call($headers);
 
     if (!isset($response->data)) return false;
     if (!isset($response->data->user)) return false;
@@ -46,7 +86,7 @@ class AccountRequests
 
   public function medias($vars = [], $headers = []) {
     $query = $this->queries->get('feed');
-    $response = $this->request->build($query, $vars)->request($headers);
+    $response = $this->graphRequest->build($query, $vars)->call($headers);
 
     if (!isset($response->data)) return false;
     if (!isset($response->data->user)) return false;

@@ -2,48 +2,32 @@
 
 namespace Instagram\Core\Libraries;
 
-use Instagram\Core\Resources\Endpoints;
 use Instagram\Core\Exceptions\InstagramException;
 
-class Request {
 
-  public $headers = [
-    'accept' => '*/*',
-    'X-IG-App-ID' => '936619743392459',
-    'X-Requested-With' => 'XMLHttpRequest'
+class ApiRequest {
+
+  public $config;
+
+  public $apiHeaders = [
+    'User-Agent: Instagram 123.0.0.21.114 (iPhone; CPU iPhone OS 11_4 like Mac OS X; en_US; en-US; scale=2.00; 750x1334) AppleWebKit/605.1.15',
   ];
 
-  public $query;
-
-  public function __construct() {
-    $this->headers['x-csrftoken'] = md5(uniqid());
+  public function __construct ($config) {
+    $this->config = $config;
   }
 
-  public function build($query, $vars) {
-    $variables = array_merge($query['variables'], $vars);
-
-    // Remove any nulls
-    foreach ($variables as $key => $val) if (is_null($val)) unset($variables[$key]);
-
-    $query['variables'] = json_encode($variables);
-    $this->query = $query;
-    return $this;
-  }
-
-  public function request ($customHeaders = []) {
+  public function call ($endpoint, $customHeaders = []) {
 
 	  // Initiate CURL
 	  $ch = curl_init();
-
-		$endpoint = 'https://www.instagram.com/graphql/query/';
-
-    $endpoint = $endpoint . '?' . http_build_query($this->query);
 
     $timeout = isset($this->config->timeout) ? $this->config->timeout : 30;
 
     // Set the URL
     curl_setopt($ch, CURLOPT_URL, $endpoint);
     curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+    curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
 
     // Proxy setup:
     if (isset($this->config->proxy)) {
@@ -84,7 +68,7 @@ class Request {
 	  curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 	  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLINFO_HEADER_OUT, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array_merge($this->headers, $customHeaders));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array_merge($this->apiHeaders, $customHeaders));
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
     // Get the response
@@ -96,8 +80,23 @@ class Request {
     // Close CURL
     curl_close ($ch);
 
-    // Return the response.
-    return json_decode($response);
+    if ($info['http_code'] !== 200) {
+      try {
+        $response = json_decode($response);
+        $response->code = $info['http_code'];
+        return $response;
+      } catch (Exception $e) {
+        throw new InstagramException("Code " . $info['http_code'] . " returned");
+      }
+    }
+
+    try {
+      $response = json_decode($response);
+    } catch (Exception $e) {
+      return false;
+    }
+
+    return $response;
 	}
 
 }

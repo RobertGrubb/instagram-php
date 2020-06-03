@@ -2,7 +2,6 @@
 
 namespace Instagram\Requests;
 
-use Instagram\Core\Libraries\Request;
 use Instagram\Core\Exceptions\InstagramException;
 
 use Instagram\Core\Resources\GraphQueries;
@@ -15,22 +14,26 @@ class MediaRequests
   /**
    * Request instance holder
    */
-  private $request = null;
+  private $graphRequest = null;
   private $domRequest = null;
+  private $jsonRequest = null;
+  private $apiRequest = null;
   private $GraphQueries = null;
 
   /**
    * Class constructor
    */
-  public function __construct($request, $domRequest) {
-    $this->request = $request;
+  public function __construct($graphRequest, $domRequest, $jsonRequest, $apiRequest) {
+    $this->graphRequest = $graphRequest;
     $this->domRequest = $domRequest;
+    $this->jsonRequest = $jsonRequest;
+    $this->apiRequest = $apiRequest;
     $this->queries = new GraphQueries();
   }
 
   public function get($vars = [], $headers = []) {
     $query = $this->queries->get('media');
-    $response = $this->request->build($query, $vars)->request($headers);
+    $response = $this->graphRequest->build($query, $vars)->call($headers);
 
     if (!isset($response->data)) return false;
     if (!isset($response->data->shortcode_media)) return false;

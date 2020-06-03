@@ -57,12 +57,20 @@ class AccountRequests
   }
 
   public function byUsername ($username, $headers = []) {
-    $user = $this->get([ 'username' => $username ], $headers);
+    $items = $this->search([ 'query' => $username, 'count' => 30 ]);
+
+    $response = false;
+
+    if ($items[0]->username !== strtolower($username)) {
+      return false;
+    }
+
+    $user = $items[0];
 
     // Sleep between the requests to be safe.
     sleep(2);
 
-    $response = $this->byId($user->id, $headers);
+    $response = $this->byId($user->pk, $headers);
 
     $model = new Account();
     $response = $model->convert($response->user);

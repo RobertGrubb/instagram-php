@@ -44,7 +44,6 @@ class Media
         $instance->videoViews = $media->video_view_count;
     }
 
-
     if (isset($media->caption_is_edited)) {
       $instance->captionIsEdited = $media->caption_is_edited;
     }

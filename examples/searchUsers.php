@@ -13,7 +13,7 @@ use Instagram\Scraper;
 // Instantiate Instagram Scraper library
 $scraper = new Scraper($config);
 
-
+// Searches for users
 $data = $scraper->account->search([ 'query' => '_mattGrubb' ]);
 
 print_r($data);

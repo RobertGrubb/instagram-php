@@ -2,22 +2,27 @@
 
 namespace Instagram\Requests;
 
+// Exceptions
 use Instagram\Core\Exceptions\InstagramException;
 
+// Resources
 use Instagram\Core\Resources\GraphQueries;
 
+// Models
 use Instagram\Core\Models\Media;
 
 class MediaRequests
 {
 
   /**
-   * Request instance holder
+   * Request instance holders
    */
   private $graphRequest = null;
   private $domRequest = null;
   private $jsonRequest = null;
   private $apiRequest = null;
+
+  // GraphQuery data
   private $GraphQueries = null;
 
   /**
@@ -31,6 +36,11 @@ class MediaRequests
     $this->queries = new GraphQueries();
   }
 
+  /**
+   * Gets a media with a specific shortcode:
+   *
+   * [ 'shortcode' => 'qwe23t2ewga' ]
+   */
   public function get($vars = [], $headers = []) {
     $query = $this->queries->get('media');
     $response = $this->graphRequest->build($query, $vars)->call($headers);

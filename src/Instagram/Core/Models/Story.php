@@ -49,7 +49,7 @@ class Story
     $instance->imageThumbnailUrl = $images['imageThumbnailUrl'];
 
     // Videos
-    $videos = $this->videosFromVersions($media->video_versions);
+    $videos = $this->videosFromVersions(isset($media->video_versions) ? $media->video_versions : false);
     $instance->videoLowResolutionUrl = $videos['videoLowResolutionUrl'];
     $instance->videoStandardResolutionUrl = $videos['videoStandardResolutionUrl'];
     $instance->videoLowBandwidthUrl = $videos['videoLowBandwidthUrl'];

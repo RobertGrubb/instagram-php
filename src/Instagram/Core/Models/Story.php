@@ -7,6 +7,7 @@ class Story
   public $id = null;
   public $code = null;
   public $createdTime;
+  public $expiringAt;
   public $type;
   public $imageLowResolutionUrl;
   public $imageThumbnailUrl;
@@ -34,14 +35,17 @@ class Story
     }
 
     $instance->createdTime = $media->taken_at;
+    $instance->expiringAt = $media->expiring_at;
     $instance->code = $media->code;
 
+    // Images
     $images = $this->imagesFromVersions($media->image_versions2);
     $instance->imageStandardResolutionUrl = $images['imageStandardResolutionUrl'];
     $instance->imageLowResolutionUrl = $images['imageLowResolutionUrl'];
     $instance->imageHighResolutionUrl = $images['imageHighResolutionUrl'];
     $instance->imageThumbnailUrl = $images['imageThumbnailUrl'];
 
+    // Videos
     $videos = $this->videosFromVersions($media->video_versions);
     $instance->videoLowResolutionUrl = $videos['videoLowResolutionUrl'];
     $instance->videoStandardResolutionUrl = $videos['videoStandardResolutionUrl'];

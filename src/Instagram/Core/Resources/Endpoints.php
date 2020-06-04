@@ -6,11 +6,12 @@ class Endpoints {
 
   public $endpoints = [
     // JsonRequest
-    'user-page'   => 'https://www.instagram.com/{username}/?__a=1',
-    'user-search' => 'https://www.instagram.com/web/search/topsearch/?query={query}&count={count}',
+    'user-page'    => 'https://www.instagram.com/{username}/?__a=1',
+    'user-search'  => 'https://www.instagram.com/web/search/topsearch/?query={query}&count={count}',
 
     // ApiRequest
-    'user-id'     => 'https://i.instagram.com/api/v1/users/{id}/info/'
+    'user-id'      => 'https://i.instagram.com/api/v1/users/{id}/info/',
+    'user-stories' => 'https://i.instagram.com/api/v1/feed/user/{id}/reel_media/'
   ];
 
   public function get($endpoint, $vars = []) {

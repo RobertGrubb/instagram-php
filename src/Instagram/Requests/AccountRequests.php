@@ -13,6 +13,7 @@ use Instagram\Core\Resources\Endpoints;
 use Instagram\Core\Normalize\UserSearch;
 
 // Models
+use Instagram\Core\Models\Story;
 use Instagram\Core\Models\Media;
 use Instagram\Core\Models\Account;
 
@@ -267,6 +268,44 @@ class AccountRequests
     foreach ($medias as $media) {
       $model = new Media();
       $items[] = $model->convert($media->node);
+    }
+
+    return $items;
+  }
+
+  /**
+   * Sends a request to i.instagram.com to get information
+   * for the user's stories.
+   */
+  public function stories ($id, $headers = []) {
+    $endpoint = $this->endpoints->get('user-stories', [ 'id' => $id ]);
+    $response = $this->apiRequest->call($endpoint, $headers);
+
+    if (!$response) {
+      $this->instance->setError([
+        'error' => true,
+        'message' => 'No response'
+      ]);
+
+      return false;
+    }
+
+    if (!$response->items) {
+      $this->instance->setError([
+        'error' => true,
+        'message' => 'No items array found'
+      ]);
+
+      return false;
+    }
+
+    $stories = $response->items;
+
+    $items = [];
+
+    foreach ($stories as $story) {
+      $model = new Story();
+      $items[] = $model->convert($story);
     }
 
     return $items;

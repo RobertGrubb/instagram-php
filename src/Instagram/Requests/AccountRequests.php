@@ -33,16 +33,26 @@ class AccountRequests
   // GraphQuery data
   private $GraphQueries = null;
 
+  // setError function from parent.
+  private $instance = null;
+
   /**
    * Class constructor
    */
-  public function __construct($graphRequest, $domRequest, $jsonRequest, $apiRequest) {
+  public function __construct (
+    $instance,
+    $graphRequest,
+    $domRequest,
+    $jsonRequest,
+    $apiRequest
+  ) {
+    $this->instance     = $instance;
     $this->graphRequest = $graphRequest;
-    $this->domRequest = $domRequest;
-    $this->jsonRequest = $jsonRequest;
-    $this->apiRequest = $apiRequest;
-    $this->endpoints = new Endpoints();
-    $this->queries = new GraphQueries();
+    $this->domRequest   = $domRequest;
+    $this->jsonRequest  = $jsonRequest;
+    $this->apiRequest   = $apiRequest;
+    $this->endpoints    = new Endpoints();
+    $this->queries      = new GraphQueries();
   }
 
   /**
@@ -55,7 +65,23 @@ class AccountRequests
     $endpoint = $this->endpoints->get('user-search', $vars);
     $response = $this->jsonRequest->call($endpoint, $headers);
 
-    if (!isset($response->users)) return false;
+    if (!$response) {
+      $this->instance->setError([
+        'error' => true,
+        'message' => 'No response'
+      ]);
+
+      return false;
+    }
+
+    if (!isset($response->users)) {
+      $this->instance->setError([
+        'error' => true,
+        'message' => 'No users array found'
+      ]);
+
+      return false;
+    }
 
     // Normalize the data
     $items = UserSearch::process($response->users);
@@ -67,9 +93,26 @@ class AccountRequests
    * Sends a request to i.instagram.com to get information
    * for the user id.
    */
-  public function byId ($id, $headers = []) {
+  public function byId ($id, $headers = [], $returnRaw = false) {
     $endpoint = $this->endpoints->get('user-id', [ 'id' => $id ]);
     $response = $this->apiRequest->call($endpoint, $headers);
+
+    if (!$response) {
+      $this->instance->setError([
+        'error' => true,
+        'message' => 'No response'
+      ]);
+
+      return false;
+    }
+
+    if ($returnRaw === false) {
+
+      // Convert to the model structure.
+      $model = new Account();
+      $response = $model->convert($response->user);
+    }
+
     return $response;
   }
 
@@ -82,9 +125,23 @@ class AccountRequests
   public function byUsername ($username, $headers = []) {
     $items = $this->search([ 'query' => $username, 'count' => 30 ]);
 
+    if (count($items) === 0) {
+      $this->instance->setError([
+        'error' => true,
+        'message' => 'No users found for ' . $username
+      ]);
+
+      return false;
+    }
+
     $response = false;
 
     if ($items[0]->username !== strtolower($username)) {
+      $this->instance->setError([
+        'error' => true,
+        'message' => 'No users found for ' . $username
+      ]);
+
       return false;
     }
 
@@ -93,7 +150,17 @@ class AccountRequests
     // Sleep between the requests to be safe.
     sleep(2);
 
-    $response = $this->byId($user->pk, $headers);
+    $response = $this->byId($user->pk, $headers, true);
+
+    if (!$response) {
+
+      $this->instance->setError([
+        'error' => true,
+        'message' => 'Could not retrieve data for ' . $username
+      ]);
+
+      return false;
+    }
 
     // Convert to the model structure.
     $model = new Account();
@@ -103,28 +170,47 @@ class AccountRequests
   }
 
   /**
-   * Get minimal user information via this route.
+   * Get information for an account by username.
    *
-   * Call it with either:
-   *
-   * [ 'username' => 'user_name_here' ]
-   *
-   * or
-   *
-   * [ 'user_id' => 1234566778 ]
+   * This route requires you to now be logged in.
    */
-  public function get($vars = [], $headers = []) {
-    $query = $this->queries->get('user');
-    $response = $this->graphRequest->build($query, $vars)->call($headers);
+  public function get($username, $headers = []) {
+    $endpoint = $this->endpoints->get('user-page', [ 'username' => $username ]);
+    $response = $this->jsonRequest->call($endpoint, $headers);
 
-    if (!isset($response->data)) return false;
-    if (!isset($response->data->user)) return false;
-    if (!isset($response->data->user->reel)) return false;
-    if (!isset($response->data->user->reel->user)) return false;
+    if (!$response) {
 
-    $userData = $response->data->user->reel->user;
+      $this->instance->setError([
+        'error' => true,
+        'message' => 'Could not retrieve data for ' . $username
+      ]);
 
-    return $userData;
+      return false;
+    }
+
+    if (!isset($response->graphql)) {
+      $this->instance->setError([
+        'error' => true,
+        'message' => 'No graphql object found'
+      ]);
+
+      return false;
+    }
+
+    if (!isset($response->graphql->user)) {
+      $this->instance->setError([
+        'error' => true,
+        'message' => 'No user object found'
+      ]);
+
+      return false;
+    }
+
+    // Convert to the model structure.
+    $model = new Account();
+    $response = $model->convertFromPage($response->graphql->user);
+
+    return $response;
   }
 
   /**
@@ -138,10 +224,41 @@ class AccountRequests
     $query = $this->queries->get('feed');
     $response = $this->graphRequest->build($query, $vars)->call($headers);
 
-    if (!isset($response->data)) return false;
-    if (!isset($response->data->user)) return false;
-    if (!isset($response->data->user->edge_owner_to_timeline_media)) return false;
-    if (!isset($response->data->user->edge_owner_to_timeline_media->edges)) return false;
+    if (!isset($response->data)) {
+      $this->instance->setError([
+        'error' => true,
+        'message' => 'No data object found'
+      ]);
+
+      return false;
+    }
+
+    if (!isset($response->data->user)) {
+      $this->instance->setError([
+        'error' => true,
+        'message' => 'No user object found'
+      ]);
+
+      return false;
+    }
+
+    if (!isset($response->data->user->edge_owner_to_timeline_media)) {
+      $this->instance->setError([
+        'error' => true,
+        'message' => 'No edge_owner_to_timeline_media object found'
+      ]);
+
+      return false;
+    }
+
+    if (!isset($response->data->user->edge_owner_to_timeline_media->edges)) {
+      $this->instance->setError([
+        'error' => true,
+        'message' => 'No edges array found'
+      ]);
+
+      return false;
+    }
 
     $medias = $response->data->user->edge_owner_to_timeline_media->edges;
 

@@ -11,7 +11,7 @@ class GraphQueries {
     $this->list = [
 
       'user' => [
-        'query_hash' => 'ad99dd9d3646cc3c0dda65debcd266a7',
+        'query_hash' => 'd4d88dc1500312af6f937f7b804c68c3',
         'variables' => [
           'username' => null,
           'user_id' => null,

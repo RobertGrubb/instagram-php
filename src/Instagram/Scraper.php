@@ -28,6 +28,11 @@ class Scraper
   private $domRequest = null;
 
   /**
+   * Error information
+   */
+  public $error = false;
+
+  /**
    * Class constructor
    */
   public function __construct($config = null) {
@@ -62,6 +67,7 @@ class Scraper
     $this->apiRequest   = new ApiRequest($this->config);
 
     $this->account = new \Instagram\Requests\AccountRequests(
+      $this,
       $this->graphRequest,
       $this->domRequest,
       $this->jsonRequest,
@@ -69,6 +75,7 @@ class Scraper
     );
 
     $this->media   = new \Instagram\Requests\MediaRequests(
+      $this,
       $this->graphRequest,
       $this->domRequest,
       $this->jsonRequest,
@@ -110,6 +117,10 @@ class Scraper
 
     // Re initialize
     $this->_initialize();
+  }
+
+  public function setError ($error) {
+    $this->error = $error;
   }
 
 }

@@ -6,6 +6,7 @@ class Endpoints {
 
   public $endpoints = [
     // JsonRequest
+    'user-page'   => 'https://www.instagram.com/{username}/?__a=1',
     'user-search' => 'https://www.instagram.com/web/search/topsearch/?query={query}&count={count}',
 
     // ApiRequest

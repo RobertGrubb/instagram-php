@@ -13,7 +13,14 @@ use Instagram\Scraper;
 // Instantiate Instagram Scraper library
 $scraper = new Scraper($config);
 
-// Needs a cookie session
-$data = $scraper->account->byId(4541199605, [ 'Cookie: ' . $config['session'] ]);
+try {
+  // Needs a cookie session
+  $data = $scraper->account->byId(4541199605, [ 'Cookie: ' . $config['session'] ]);
 
-print_r($data);
+  // Scraper will set an error, and you can check it like so:
+  if (!$data && $scraper->error !== false) print_r($scraper->error);
+
+  print_r($data);
+} catch (Exception $e) {
+  echo $e->getMessage() . PHP_EOL;
+}

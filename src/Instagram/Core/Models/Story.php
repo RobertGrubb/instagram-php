@@ -6,6 +6,7 @@ use Instagram\Core\Models\Account;
 
 class Story
 {
+
   public $id = null;
   public $code = null;
   public $createdTime;
@@ -60,6 +61,9 @@ class Story
     return $instance;
   }
 
+  /**
+   * Return array of video resolutions.
+   */
   private function videosFromVersions ($videoVersions) {
     if (!$videoVersions) {
       return [
@@ -80,6 +84,9 @@ class Story
     ];
   }
 
+  /**
+   * Return array of image resolutions
+   */
   private function imagesFromVersions ($imageVersions) {
     $lowRes  = $imageVersions->candidates[1]->url;
     $highRes = $imageVersions->candidates[0]->url;

@@ -51,7 +51,7 @@ class MediaRequests
    *
    * [ 'shortcode' => 'qwe23t2ewga' ]
    */
-  public function get($vars = [], $headers = []) {
+  public function get ($vars = [], $headers = []) {
     $query = $this->queries->get('media');
     $response = $this->graphRequest->build($query, $vars)->call($headers);
 

@@ -175,7 +175,7 @@ class AccountRequests
    *
    * This route requires you to now be logged in.
    */
-  public function get($username, $headers = []) {
+  public function get ($username, $headers = []) {
     $endpoint = $this->endpoints->get('user-page', [ 'username' => $username ]);
     $response = $this->jsonRequest->call($endpoint, $headers);
 
@@ -221,7 +221,7 @@ class AccountRequests
    *
    * [ 'id' => 1234566788 ]
    */
-  public function medias($vars = [], $headers = []) {
+  public function medias ($vars = [], $headers = []) {
     $query = $this->queries->get('feed');
     $response = $this->graphRequest->build($query, $vars)->call($headers);
 

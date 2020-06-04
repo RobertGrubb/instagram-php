@@ -32,6 +32,12 @@ class Account
     $instance->isPrivate = $user->is_private;
     $instance->externalUrl = $user->external_url;
     $instance->isVerified = $user->is_verified;
+
+    // Unset fields that are null and was never set.
+    foreach ($instance as $key => $val) {
+      if (is_null($val)) unset($instance->{$key});
+    }
+
     return $instance;
   }
 

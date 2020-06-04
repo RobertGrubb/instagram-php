@@ -2,6 +2,8 @@
 
 namespace Instagram\Core\Models;
 
+use Instagram\Core\Models\Account;
+
 class Story
 {
   public $id = null;
@@ -52,7 +54,7 @@ class Story
     $instance->videoLowBandwidthUrl = $videos['videoLowBandwidthUrl'];
 
     $instance->caption = $media->caption;
-    $instance->owner = $media->user;
+    $instance->owner = (new Account())->convert($media->user);
     $instance->ownerId = $media->user->pk;
 
     return $instance;

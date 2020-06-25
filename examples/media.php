@@ -15,7 +15,7 @@ try {
   /**
    * Use the following syntax to get information for a media post.
    */
-  $data = $scraper->media->get([ 'shortcode' => 'CAdO-8MjgHM' ]);
+  $data = $scraper->media->get([ 'shortcode' => 'CBoAuqyHcFk' ]);
 
   // Scraper will set an error, and you can check it like so:
   if (!$data && $scraper->error !== false) print_r($scraper->error);

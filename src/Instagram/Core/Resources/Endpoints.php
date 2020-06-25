@@ -5,6 +5,8 @@ namespace Instagram\Core\Resources;
 class Endpoints {
 
   public $endpoints = [
+    'user-dom'     => 'https://www.instagram.com/{username}/',
+
     // JsonRequest
     'user-page'    => 'https://www.instagram.com/{username}/?__a=1',
     'user-search'  => 'https://www.instagram.com/web/search/topsearch/?query={query}&count={count}',

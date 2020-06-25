@@ -94,7 +94,44 @@ class Media
     $instance->owner = $media->owner;
     $instance->ownerId = $media->owner->id;
 
+    $instance->carouselMedia = $this->processCarousel($media);
+
     return $instance;
+  }
+
+  private function processCarousel ($media) {
+    if (!isset($media->edge_sidecar_to_children)) return null;
+    if (!isset($media->edge_sidecar_to_children->edges)) return null;
+
+    $carouselMedia = [];
+    $items = $media->edge_sidecar_to_children->edges;
+
+    foreach ($items as $item) {
+      $node = $item->node;
+
+      $images = $this->getImageUrlsFromDisplayResources($node->display_resources);
+
+      $data = (object) [
+        'id' => $node->id,
+        'shortcode' => $node->shortcode,
+        'imageStandardResolutionUrl' => $images['standard'],
+        'imageLowResolutionUrl' => $images['low'],
+        'imageHighResolutionUrl' => $images['high'],
+        'imageThumbnailUrl' => $images['thumbnail']
+      ];
+
+      $data->type = 'image';
+
+      if ($node->is_video) {
+          $data->type = 'video';
+          $data->videoStandardResolutionUrl = $media->video_url;
+          $data->videoViews = $media->video_view_count;
+      }
+
+      $carouselMedia[] = $data;
+    }
+
+    return $carouselMedia;
   }
 
   private function getImageUrlsFromDisplayResources($displayResources) {
